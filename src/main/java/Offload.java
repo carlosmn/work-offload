@@ -61,7 +61,13 @@ public class Offload {
 
     public Offload(List<Node> nodes, Node start) {
         this.m = new int[nodes.size()][nodes.size()];
+        // fill the matrix with -1 to indicate no connection, we will fill this
+        // with cost values later
+        for (int[] arr : this.m) {
+            Arrays.fill(arr, -1);
+        }
         this.nodes = new InternalNode[nodes.size()];
+        // mapping between an object and our offset for it
         Map<Node, Integer> mapping = new HashMap<Node, Integer>();
 
         for (int i = 0; i < nodes.size(); i++) {
