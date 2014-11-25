@@ -27,7 +27,7 @@ public class OffloadTest {
         d.addEdge(e, 5);
         e.addEdge(f, 4);
 
-        Offload offload = new Offload(Arrays.asList(a, b, c, d, e, f), a);
+        Offload offload = new Offload(Arrays.asList(a, b, c, d, e, f));
         Offload.Result result = offload.optimize();
 
         Assert.assertArrayEquals(result.local.toArray(), new Offload.Node[]{a, b});
