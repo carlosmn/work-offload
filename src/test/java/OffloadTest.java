@@ -13,7 +13,8 @@ import java.util.List;
  */
 public class OffloadTest {
     @Test
-    public void testLinear() {
+    public void testLinear()
+        throws Exception {
         Offload.Node a = new Offload.Node(0, 0, false);
         Offload.Node b = new Offload.Node(4, 1);
         Offload.Node c = new Offload.Node(8, 2);
@@ -30,8 +31,29 @@ public class OffloadTest {
         Offload offload = new Offload(Arrays.asList(a, b, c, d, e, f));
         Offload.Result result = offload.optimize();
 
-        Assert.assertArrayEquals(result.local.toArray(), new Offload.Node[]{a, b});
-        Assert.assertArrayEquals(result.local.toArray(), new Offload.Node[]{c, d, e, f});
+        Assert.assertEquals(result.local, new HashSet(Arrays.asList(a, b)));
+        Assert.assertEquals(result.remote, new HashSet(Arrays.asList(c, d, e, f)));
+    }
+
+    @Test
+    public void mergeStartNodes()
+        throws Exception {
+        Offload.Node a = new Offload.Node(0, 0, false);
+        Offload.Node b = new Offload.Node(4, 1);
+        Offload.Node c = new Offload.Node(8, 2);
+        Offload.Node d = new Offload.Node(8, 2, false);
+        Offload.Node e = new Offload.Node(4, 1);
+        Offload.Node f = new Offload.Node(8, 2);
+
+        a.addEdge(b, 10);
+        b.addEdge(c, 6);
+        c.addEdge(d, 5);
+        d.addEdge(e, 5);
+        e.addEdge(f, 4);
+
+        Offload offload = new Offload(Arrays.asList(a, b, c, d, e, f));
+        Offload.Result result = offload.optimize();
+        Assert.assertEquals(new HashSet(Arrays.asList(a, d)), offload.getStartNodes());
     }
 
     @Test
