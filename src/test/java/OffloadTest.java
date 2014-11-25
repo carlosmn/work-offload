@@ -28,6 +28,6 @@ public class OffloadTest {
         e.addEdge(f, 4);
 
         Offload offload = new Offload(Arrays.asList(new Offload.Node[] {a,b,c,d,e,f}), a);
-        List<Offload.Node> result = offload.optimize();
+        Offload.Result result = offload.optimize();
     }
 }

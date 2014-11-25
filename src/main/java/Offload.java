@@ -38,6 +38,11 @@ public class Offload {
         }
     }
 
+    static public class Result {
+        List<Node> local;
+        List<Node> remote;
+    }
+
     // this would be a good candidate for optimisation if the processing time
     // gets too expensive
     static class InternalNode {
@@ -75,7 +80,13 @@ public class Offload {
         }
     }
 
-    public List<Node> optimize() {
+    /**
+     * Optimise the graph according to the given rules (todo: allow specifying the rules).
+     *
+     * @return a Result. The lists are filled with the (unchanged) nodes specified
+     * in the constructor.
+     */
+    public Result optimize() {
         throw new NotImplementedException();
     }
 }
