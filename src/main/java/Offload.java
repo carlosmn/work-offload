@@ -39,8 +39,8 @@ public class Offload {
     }
 
     static public class Result {
-        List<Node> local;
-        List<Node> remote;
+        Set<Node> local;
+        Set<Node> remote;
     }
 
     // this would be a good candidate for optimisation if the processing time
