@@ -1,3 +1,5 @@
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.*;
 
 /**
@@ -36,6 +38,8 @@ public class Offload {
         }
     }
 
+    // this would be a good candidate for optimisation if the processing time
+    // gets too expensive
     static class InternalNode {
         int localCost;
         int remoteCost;
@@ -69,5 +73,9 @@ public class Offload {
                 this.m[j][i] = e.cost;
             }
         }
+    }
+
+    public List<Node> optimize() {
+        throw new NotImplementedException();
     }
 }
