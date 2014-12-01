@@ -59,7 +59,7 @@ public class Offload {
     int[][] m;
     InternalNode[] nodes;
 
-    public Offload(List<Node> nodes, Node start) {
+    public Offload(List<Node> nodes) {
         this.m = new int[nodes.size()][nodes.size()];
         // fill the matrix with -1 to indicate no connection, we will fill this
         // with cost values later
