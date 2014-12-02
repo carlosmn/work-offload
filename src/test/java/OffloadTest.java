@@ -37,8 +37,8 @@ public class OffloadTest {
         Offload offload = new Offload(a, b, c, d, e, f);
         Offload.Result result = offload.optimize();
 
-        Assert.assertEquals(result.local, new HashSet(Arrays.asList(a, b)));
-        Assert.assertEquals(result.remote, new HashSet(Arrays.asList(c, d, e, f)));
+        Assert.assertEquals(result.local, new HashSet(Arrays.asList(a, d, b)));
+        Assert.assertEquals(result.remote, new HashSet(Arrays.asList(c, e, f)));
     }
 
     @Test
