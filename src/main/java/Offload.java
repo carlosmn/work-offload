@@ -124,7 +124,7 @@ public class Offload {
 
         startNode = unoff.get(0);
         for (int j = 1; j < unoff.size(); j++) {
-            mergeVertices(startNode, unoff.get(j));
+            mergeVertices(m, startNode, unoff.get(j));
         }
 
         result.local.addAll(getStartNodes());
@@ -143,23 +143,23 @@ public class Offload {
         return lst;
     }
 
-    void mergeVertices(InternalNode s, InternalNode t) {
+    void mergeVertices(int[][] graph, InternalNode s, InternalNode t) {
         // the computation cost is added up
         s.localCost += t.localCost;
         s.remoteCost += t.remoteCost;
 
         // these two nodes are no longer connected
-        m[s.id][t.id] = -1;
-        m[t.id][s.id] = -1;
+        graph[s.id][t.id] = -1;
+        graph[t.id][s.id] = -1;
 
-        int tRow[] = m[t.id];
+        int tRow[] = graph[t.id];
         for (int i = 0; i < nodes.length; i++) {
             int tCost = tRow[i];
             if (tCost == -1)
                 continue;
 
             // handle the -1 as well as a set cost from s
-            int sCost = m[s.id][i];
+            int sCost = graph[s.id][i];
             int newCost;
             if (sCost == -1)
                 newCost = tCost;
@@ -167,11 +167,11 @@ public class Offload {
                 newCost = sCost + tCost;
 
             // set the new cost in the edge matrix
-            m[s.id][i] = newCost;
-            m[i][s.id] = newCost;
+            graph[s.id][i] = newCost;
+            graph[i][s.id] = newCost;
             // and remove the old edge
-            m[t.id][i] = -1;
-            m[i][t.id] = -1;
+            graph[t.id][i] = -1;
+            graph[i][t.id] = -1;
         }
 
         s.merged.add(t);
