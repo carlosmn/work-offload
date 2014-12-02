@@ -1,5 +1,3 @@
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.*;
 
 /**
@@ -67,6 +65,24 @@ public class Offload {
         }
     }
 
+    static class Cut {
+        // second to last vertex added to A
+        public final int s;
+        // last vertex added to A
+        public final int t;
+        public final Set<InternalNode> A;
+        public final InternalNode[] nodes;
+        public final int[][] graph;
+
+        public Cut(Set<InternalNode> A, int[][] graph, InternalNode[] nodes, int s, int t) {
+            this.A = A;
+            this.graph = graph;
+            this.nodes = nodes;
+            this.s = s;
+            this.t = t;
+        }
+    }
+
     InternalNode startNode;
     /* Edge matrix with transmission costs */
     int[][] m;
@@ -124,7 +140,7 @@ public class Offload {
 
         startNode = unoff.get(0);
         for (int j = 1; j < unoff.size(); j++) {
-            mergeVertices(m, startNode, unoff.get(j));
+            mergeVertices(m, nodes, startNode, unoff.get(j));
         }
 
         result.local.addAll(getStartNodes());
@@ -143,7 +159,7 @@ public class Offload {
         return lst;
     }
 
-    void mergeVertices(int[][] graph, InternalNode s, InternalNode t) {
+    static void mergeVertices(int[][] graph, InternalNode[] nodes, InternalNode s, InternalNode t) {
         // the computation cost is added up
         s.localCost += t.localCost;
         s.remoteCost += t.remoteCost;
@@ -175,5 +191,55 @@ public class Offload {
         }
 
         s.merged.add(t);
+    }
+
+    Cut minCutPhase() {
+        // we need to make a copy of the graph, as we are going to merge nodes and
+        // we do not want those changes to appear on the main node
+        int[][] graph = new int[m.length][0];
+        for (int i = 0; i < m.length; i++) {
+            graph[i] = Arrays.copyOf(m[i], m[i].length);
+        }
+        // the same goes for the nodes, we want to merge the copies
+        InternalNode[] scratchNodes = new InternalNode[nodes.length];
+        for (int i = 0; i < nodes.length; i++) {
+            scratchNodes[i] = new InternalNode(nodes[i].id, nodes[i].parent);
+        }
+
+        // keep track of which nodes we've already merged
+        Set<InternalNode> A = new HashSet<InternalNode>();
+
+        int aIdx = 0;
+        int s = 0, t = 0;
+
+        A.add(scratchNodes[aIdx]);
+        // while A =/= V_i
+        while (A.size() < scratchNodes.length) {
+            int vMaxIdx = 0, vMaxGain = 0;
+            // while v \in V_i and v \not\in A
+            for (int i = 0; i < scratchNodes.length; i++) {
+                if (A.contains(scratchNodes[i]) || graph[aIdx][i] == -1) {
+                    continue;
+                }
+
+                InternalNode node = scratchNodes[i];
+                int gain = graph[aIdx][i] - (node.localCost - node.remoteCost);
+                if (gain > vMaxGain) {
+                    vMaxGain = gain;
+                    vMaxIdx = i;
+                }
+            }
+
+            // vMaxIdx is the most tightly connected vertex to A
+            s = t;
+            t = vMaxIdx;
+            A.add(scratchNodes[vMaxIdx]);
+            mergeVertices(graph, scratchNodes, scratchNodes[aIdx], scratchNodes[vMaxIdx]);
+        }
+
+        A.remove(scratchNodes[t]);
+
+        //return cut(A-t, t), s, t
+        return new Cut(A, graph, scratchNodes, s, t);
     }
 }
