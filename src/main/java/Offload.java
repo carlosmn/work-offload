@@ -140,7 +140,7 @@ public class Offload {
 
         startNode = unoff.get(0);
         for (int j = 1; j < unoff.size(); j++) {
-            mergeVertices(m, nodes, startNode, unoff.get(j));
+            mergeVertices(m, startNode, unoff.get(j));
         }
 
         result.local.addAll(getStartNodes());
@@ -159,7 +159,7 @@ public class Offload {
         return lst;
     }
 
-    static void mergeVertices(int[][] graph, InternalNode[] nodes, InternalNode s, InternalNode t) {
+    static void mergeVertices(int[][] graph, InternalNode s, InternalNode t) {
         // the computation cost is added up
         s.localCost += t.localCost;
         s.remoteCost += t.remoteCost;
@@ -169,7 +169,7 @@ public class Offload {
         graph[t.id][s.id] = -1;
 
         int tRow[] = graph[t.id];
-        for (int i = 0; i < nodes.length; i++) {
+        for (int i = 0; i < graph.length; i++) {
             int tCost = tRow[i];
             if (tCost == -1)
                 continue;
@@ -234,7 +234,7 @@ public class Offload {
             s = t;
             t = vMaxIdx;
             A.add(scratchNodes[vMaxIdx]);
-            mergeVertices(graph, scratchNodes, scratchNodes[aIdx], scratchNodes[vMaxIdx]);
+            mergeVertices(graph, scratchNodes[aIdx], scratchNodes[vMaxIdx]);
         }
 
         A.remove(scratchNodes[t]);
