@@ -20,7 +20,7 @@ public class OffloadTest {
         a = new Offload.Node(0, 0, false);
         b = new Offload.Node(4, 1);
         c = new Offload.Node(8, 2);
-        d = new Offload.Node(8, 2);
+        d = new Offload.Node(8, 2, false);
         e = new Offload.Node(4, 1);
         f = new Offload.Node(8, 2);
 
