@@ -37,8 +37,8 @@ public class OffloadTest {
         Offload offload = new Offload(a, b, c, d, e, f);
         Offload.Result result = offload.optimize();
 
-        Assert.assertEquals(new HashSet(Arrays.asList(a, d, e)), result.local);
-        Assert.assertEquals(new HashSet(Arrays.asList(c, b, f)), result.remote);
+        Assert.assertEquals(new HashSet(Arrays.asList(a, b, c, d)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(e, f)), result.remote);
     }
 
     @Test
@@ -72,10 +72,8 @@ public class OffloadTest {
         d.addEdge(f, 1);
         e.addEdge(f, 1);
 
-        System.out.println("----------");
         Offload offload = new Offload(a, b, c, d, e, f);
         Offload.Result result = offload.optimize();
-        System.out.println("----------");
         Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
         Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
     }
