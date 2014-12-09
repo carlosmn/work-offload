@@ -54,7 +54,6 @@ public class Offload {
         int remoteCost;
         boolean offloadable;
         Node parent;
-        List<InternalNode> merged = new ArrayList<InternalNode>();
 
         public InternalNode(int id, Node parent) {
             this.id = id;
@@ -233,8 +232,6 @@ public class Offload {
             graph[t.id][i] = -1;
             graph[i][t.id] = -1;
         }
-
-        s.merged.add(t);
     }
 
     Cut minCutPhase() {
