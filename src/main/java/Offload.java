@@ -73,6 +73,7 @@ public class Offload {
         public final Set<InternalNode> A;
         public final InternalNode[] nodes;
         public final int[][] graph;
+        public final float weight;
 
         public Cut(Set<InternalNode> A, int[][] graph, InternalNode[] nodes, int s, int t) {
             this.A = A;
@@ -80,6 +81,24 @@ public class Offload {
             this.nodes = nodes;
             this.s = s;
             this.t = t;
+            this.weight = calculateWeight();
+        }
+
+        float calculateWeight() {
+            float sum = 0;
+
+            for (int i = 0; i < this.nodes.length; i++) {
+                sum += this.nodes[i].localCost;
+            }
+
+            sum -= this.nodes[t].localCost - this.nodes[t].remoteCost;
+
+            float localSum = 0;
+            for (InternalNode n : this.A) {
+                localSum += this.graph[t][n.id];
+            }
+
+            return sum;
         }
     }
 
@@ -87,6 +106,7 @@ public class Offload {
     /* Edge matrix with transmission costs */
     int[][] m;
     InternalNode[] nodes;
+    int activeNodes;
 
     public Offload(Node... nodes) {
         this.m = new int[nodes.length][nodes.length];
@@ -96,6 +116,7 @@ public class Offload {
             Arrays.fill(arr, -1);
         }
         this.nodes = new InternalNode[nodes.length];
+        this.activeNodes = nodes.length;
         // mapping between an object and our offset for it
         Map<Node, Integer> mapping = new HashMap<Node, Integer>();
 
@@ -115,7 +136,7 @@ public class Offload {
         }
     }
 
-    public Set<Node> getStartNodes() {
+    public Set<Node> getLocalNodes() {
         Set<Node> lst = new HashSet<Node>();
         lst.add(startNode.parent);
         for (InternalNode n : startNode.merged) {
@@ -134,6 +155,7 @@ public class Offload {
     public Result optimize()
         throws Exception {
         Result result = new Result();
+
         List<InternalNode> unoff = findUnoffloadable();
         if (unoff.isEmpty())
             throw new Exception("no unoffloadable nodes");
@@ -141,9 +163,25 @@ public class Offload {
         startNode = unoff.get(0);
         for (int j = 1; j < unoff.size(); j++) {
             mergeVertices(m, startNode, unoff.get(j));
+            this.activeNodes--;
         }
 
-        result.local.addAll(getStartNodes());
+        Cut minCut = null, lastCut = null;
+
+        do {
+           lastCut = minCutPhase();
+            if (minCut == null || lastCut.weight < minCut.weight)
+                minCut = lastCut;
+
+            mergeVertices(this.m, this.nodes[lastCut.s], this.nodes[lastCut.t]);
+            this.activeNodes--;
+        } while(lastCut.A.size() > 1);
+
+        result.local.addAll(getLocalNodes());
+        for (InternalNode n : this.nodes) {
+            if (!result.local.contains(n.parent))
+                result.remote.add(n.parent);
+        }
         return result;
     }
 
@@ -213,9 +251,10 @@ public class Offload {
         int s = 0, t = 0;
 
         A.add(scratchNodes[aIdx]);
+        int activeNodes = this.activeNodes;
         // while A =/= V_i
-        while (A.size() < scratchNodes.length) {
-            int vMaxIdx = 0, vMaxGain = 0;
+        while (A.size() < activeNodes) {
+            int vMaxIdx = 1, vMaxGain = 1;
             // while v \in V_i and v \not\in A
             for (int i = 0; i < scratchNodes.length; i++) {
                 if (A.contains(scratchNodes[i]) || graph[aIdx][i] == -1) {
@@ -234,7 +273,9 @@ public class Offload {
             s = t;
             t = vMaxIdx;
             A.add(scratchNodes[vMaxIdx]);
+            //System.out.println("added " + vMaxIdx);
             mergeVertices(graph, scratchNodes[aIdx], scratchNodes[vMaxIdx]);
+            activeNodes--;
         }
 
         A.remove(scratchNodes[t]);
