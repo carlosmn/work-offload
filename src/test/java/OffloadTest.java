@@ -37,16 +37,8 @@ public class OffloadTest {
         Offload offload = new Offload(a, b, c, d, e, f);
         Offload.Result result = offload.optimize();
 
-        Assert.assertEquals(new HashSet(Arrays.asList(a, d, b)), result.local);
-        Assert.assertEquals(new HashSet(Arrays.asList(c, e, f)), result.remote);
-    }
-
-    @Test
-    public void mergeStartNodes()
-        throws Exception {
-        Offload offload = new Offload(a, b, c, d, e, f);
-        Offload.Result result = offload.optimize();
-        Assert.assertEquals(new HashSet(Arrays.asList(a, b, d)), offload.getLocalNodes());
+        Assert.assertEquals(new HashSet(Arrays.asList(a, d, e)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(c, b, f)), result.remote);
     }
 
     @Test
@@ -59,5 +51,32 @@ public class OffloadTest {
 
         dummyResult.remote = new HashSet(Arrays.asList(c, d, f, e));
         Assert.assertEquals(dummyResult.remote, new HashSet(Arrays.asList(c, d, f, e)));
+    }
+
+    @Test
+    public void testPaperGraph()
+        throws Exception {
+        a = new Offload.Node(0, 0, false);
+        b = new Offload.Node(3, 1);
+        c = new Offload.Node(3, 1);
+        d = new Offload.Node(6, 2);
+        e = new Offload.Node(6, 2);
+        f = new Offload.Node(9, 3);
+
+        a.addEdge(b, 10);
+        b.addEdge(c, 1);
+        b.addEdge(d, 2);
+        c.addEdge(d, 1);
+        c.addEdge(e, 1);
+        d.addEdge(e, 2);
+        d.addEdge(f, 1);
+        e.addEdge(f, 1);
+
+        System.out.println("----------");
+        Offload offload = new Offload(a, b, c, d, e, f);
+        Offload.Result result = offload.optimize();
+        System.out.println("----------");
+        Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
     }
 }

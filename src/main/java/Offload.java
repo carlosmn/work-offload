@@ -63,6 +63,15 @@ public class Offload {
             this.offloadable = parent.offloadable;
             this.parent = parent;
         }
+
+        public InternalNode(InternalNode n) {
+            this.id = n.id;
+            this.localCost = n.localCost;
+            this.remoteCost = n.remoteCost;
+            this.offloadable = n.parent.offloadable;
+            this.parent = n.parent;
+
+        }
     }
 
     static class Cut {
@@ -75,28 +84,42 @@ public class Offload {
         public final int[][] graph;
         public final float weight;
 
-        public Cut(Set<InternalNode> A, int[][] graph, InternalNode[] nodes, int s, int t) {
+        public Cut(Set<InternalNode> A, int[][] graph, int[][] origGraph, InternalNode[] nodes, int s, int t) {
             this.A = A;
             this.graph = graph;
             this.nodes = nodes;
             this.s = s;
             this.t = t;
-            this.weight = calculateWeight();
+            this.weight = calculateWeight(origGraph);
         }
 
-        float calculateWeight() {
+        float calculateWeight(int[][] m) {
             float sum = 0;
 
             for (int i = 0; i < this.nodes.length; i++) {
-                sum += this.nodes[i].localCost;
+                sum += this.nodes[i].parent.localCost;
             }
+
+            System.out.println("first sum " + sum + " minus " + (this.nodes[t].localCost - this.nodes[t].remoteCost));
 
             sum -= this.nodes[t].localCost - this.nodes[t].remoteCost;
 
-            float localSum = 0;
-            for (InternalNode n : this.A) {
-                localSum += this.graph[t][n.id];
+            System.out.println("sum " + sum);
+
+            System.out.println("graph " + this.graph);
+
+
+
+           // sum += this.graph[0][t];
+            for(int i = 0; i < m.length; i++) {
+                int cost = m[t][i];
+                if (cost < 0)
+                    continue;
+                System.out.println("t <-> i " + m[t][i]);
+                sum += cost;
+
             }
+            System.out.println("sum " + sum);
 
             return sum;
         }
@@ -136,16 +159,6 @@ public class Offload {
         }
     }
 
-    public Set<Node> getLocalNodes() {
-        Set<Node> lst = new HashSet<Node>();
-        lst.add(startNode.parent);
-        for (InternalNode n : startNode.merged) {
-            lst.add(n.parent);
-        }
-
-        return lst;
-    }
-
     /**
      * Optimise the graph according to the given rules (todo: allow specifying the rules).
      *
@@ -170,14 +183,26 @@ public class Offload {
 
         do {
            lastCut = minCutPhase();
-            if (minCut == null || lastCut.weight < minCut.weight)
-                minCut = lastCut;
+            if (minCut == null || lastCut.weight < minCut.weight) {
+                if (minCut != null) {
+                    System.out.println("min Cut " + minCut.weight);
+                }
+                System.out.println("last Cut " + lastCut.weight);
 
+                minCut = lastCut;
+            }
+
+            System.out.println("lower " + (lastCut.weight < minCut.weight));
+            System.out.println("min cost " + minCut.weight + " last cut " + lastCut.weight);
+            System.out.println("s cost " + this.nodes[lastCut.s].localCost);
             mergeVertices(this.m, this.nodes[lastCut.s], this.nodes[lastCut.t]);
+            System.out.println("s cost " + this.nodes[lastCut.s].localCost);
             this.activeNodes--;
         } while(lastCut.A.size() > 1);
 
-        result.local.addAll(getLocalNodes());
+        for (InternalNode n : minCut.A) {
+            result.local.add(n.parent);
+        }
         for (InternalNode n : this.nodes) {
             if (!result.local.contains(n.parent))
                 result.remote.add(n.parent);
@@ -229,6 +254,9 @@ public class Offload {
         }
 
         s.merged.add(t);
+        for (InternalNode n : t.merged) {
+            s.merged.add(n);
+        }
     }
 
     Cut minCutPhase() {
@@ -241,7 +269,7 @@ public class Offload {
         // the same goes for the nodes, we want to merge the copies
         InternalNode[] scratchNodes = new InternalNode[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
-            scratchNodes[i] = new InternalNode(nodes[i].id, nodes[i].parent);
+            scratchNodes[i] = new InternalNode(nodes[i]);
         }
 
         // keep track of which nodes we've already merged
@@ -251,10 +279,10 @@ public class Offload {
         int s = 0, t = 0;
 
         A.add(scratchNodes[aIdx]);
-        int activeNodes = this.activeNodes;
         // while A =/= V_i
-        while (A.size() < activeNodes) {
-            int vMaxIdx = 1, vMaxGain = 1;
+        while (A.size() < this.activeNodes) {
+            System.out.println("A.size() = " + A.size() + ", activeNodes = " + activeNodes);
+            int vMaxIdx = 0, vMaxGain = Integer.MIN_VALUE;
             // while v \in V_i and v \not\in A
             for (int i = 0; i < scratchNodes.length; i++) {
                 if (A.contains(scratchNodes[i]) || graph[aIdx][i] == -1) {
@@ -263,6 +291,7 @@ public class Offload {
 
                 InternalNode node = scratchNodes[i];
                 int gain = graph[aIdx][i] - (node.localCost - node.remoteCost);
+                System.out.println("gain from " + node.id + " " + gain + " max " + vMaxGain);
                 if (gain > vMaxGain) {
                     vMaxGain = gain;
                     vMaxIdx = i;
@@ -275,12 +304,11 @@ public class Offload {
             A.add(scratchNodes[vMaxIdx]);
             //System.out.println("added " + vMaxIdx);
             mergeVertices(graph, scratchNodes[aIdx], scratchNodes[vMaxIdx]);
-            activeNodes--;
         }
 
         A.remove(scratchNodes[t]);
 
         //return cut(A-t, t), s, t
-        return new Cut(A, graph, scratchNodes, s, t);
+        return new Cut(A, graph, this.m, scratchNodes, s, t);
     }
 }
