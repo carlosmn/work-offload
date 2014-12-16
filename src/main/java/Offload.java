@@ -118,6 +118,10 @@ public class Offload {
 	InternalNode startNode;	//algorithm needs an arbitrary startNode, we always take the first which is unoffloadable
 	int[][] m;				//edge matrix with communication costs; symmetric (only undirected edges)
 	InternalNode[] nodes;	//set of all nodes
+	// We keep track of the number of active nodes as we remove merged nodes from the edge matrix
+	// but keep the corresponding rows and columns. This extra book-keeping lets minCutPhase() know
+	// how many nodes there are left which it needs in order to know when it has consumed all the
+	// nodes.
 	int activeNodes;		//counter of active nodes, TODO: geht bestimmt besser
 
 	public Offload(Node... nodes) {
