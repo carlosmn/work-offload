@@ -151,7 +151,8 @@ public class Offload {
 	 * Optimise the graph according to the given rules (TODO: allow specifying the rules).
 	 * is called MinCut in the paper
 	 * 
-	 * @return a Result object with sets of nodes which should be computed locally and remotely 
+	 * @return a Result object with sets of nodes which should be computed locally and remotely. These sets contain
+	 * the unmodified Nodes given as input.
 	 */	
 	public Result optimize() throws Exception {
 		Result result = new Result();
