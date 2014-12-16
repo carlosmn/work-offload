@@ -2,7 +2,7 @@ import java.util.*;
 
 /**
  * Implementation of the Optimal Offloading Partitioning Algorithm (Authors: Huaming Wu, Katinka Wolter) 
- * 	by Carlos Martìn Nieto, Daniel Seidenstücker (both Freie Universitaet Berlin)
+ * 	by Carlos MartÃ­n Nieto, Daniel SeidenstÃ¼cker (both Freie UniversitÃ¤t Berlin)
  */
 
 public class Offload {
