@@ -206,7 +206,13 @@ public class Offload {
 		return lst;
 	}
 
-	//merge 2 vertices (s,t) into one (s) and add local, remote, and communication costs
+	/**
+	 * Merge vertex t into vertex s, adding together their local, remote, and communication costs.
+	 *
+	 * @param graph the edge matrix for these nodes.
+	 * @param s the node to merge into.
+	 * @param t the node to merge into s.
+	 */
 	static void mergeVertices(int[][] graph, InternalNode s, InternalNode t) {
 		//add up the computation costs
 		s.localCost += t.localCost;
