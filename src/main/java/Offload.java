@@ -11,7 +11,8 @@ public class Offload {
 		public final int remoteCost;
 		public final boolean offloadable;
 
-		List<Edge> edges = new ArrayList<Edge>();//contains target edges with corresponding costs
+		/** contains target edges with corresponding costs */
+		List<Edge> edges = new ArrayList<Edge>();
 
 		public Node(int local, int remote) {
 			this(local, remote, true);
@@ -29,7 +30,8 @@ public class Offload {
 	}//class end Node
 	
 	static public class Edge {
-		public final Node node;//target node
+		/** target node */
+		public final Node node;
 		public final int cost;//TODO: eindeutig benennen
 
 		public Edge(Node node, int cost) {
@@ -41,7 +43,8 @@ public class Offload {
 	// this would be a good candidate for optimisation if the processing time
 	// gets too expensive
 	static class InternalNode {
-		int id;				//internal identification number for nodes, beginning at 0
+		/** internal identification number for nodes, beginning at 0 */
+		int id;
 		int localCost;
 		int remoteCost;
 		boolean offloadable;
@@ -65,14 +68,20 @@ public class Offload {
 		}
 	}//class end InternalNode
 	
-	//a cut is a partitioning of a graph into 2 set of nodes: local calculated (A) and remote calculated (nodes-A)
-	static class Cut {		
-		public final int s;					//second to last vertex added to A		
-		public final int t;					//last vertex added to A
-		public final Set<InternalNode> A; 	//growing set of nodes, see algorithm paper 
-		public final InternalNode[] nodes;	//all nodes as InternalNodes
-		public final int[][] graph;			//edge matric with communication costs (similar to m)
-		public final float weight;			//calculated weight of this cut ()
+	/** a cut is a partitioning of a graph into 2 set of nodes: local calculated (A) and remote calculated (nodes-A) */
+	static class Cut {
+		/** second to last vertex added to A */
+		public final int s;
+		/** last vertex added to A */
+		public final int t;
+		/** growing set of nodes, see algorithm paper */
+		public final Set<InternalNode> A;
+		/** all nodes as InternalNodes */
+		public final InternalNode[] nodes;
+		/** edge matric with communication costs (similar to m) */
+		public final int[][] graph;
+		/** calculated weight of this cut () */
+		public final float weight;
 
 		public Cut(Set<InternalNode> A, int[][] graph, int[][] origGraph,InternalNode[] nodes, int s, int t) {
 			this.A = A;
@@ -83,7 +92,7 @@ public class Offload {
 			this.weight = calculateWeight(origGraph);
 		}
 		
-		//sum=all localcosts-(t.localCost-t.remoteCost)+communication costs of edges t->graph\{t} 
+		/** sum=all localcosts-(t.localCost-t.remoteCost)+communication costs of edges t->graph\{t} */
 		float calculateWeight(int[][] m) {
 			float sum = 0;
 			for (int i = 0; i < this.nodes.length; i++) {
@@ -100,8 +109,10 @@ public class Offload {
 	}//class end Cut	
 	
 	static public class Result {
-		Set<Node> local;	//set of nodes which should be calculated locally
-		Set<Node> remote;	//set of nodes which should be calculated remotely
+		/** Set of nodes which should be calculated locally */
+		Set<Node> local;
+		/** set of nodes which should be calculated remotely */
+		Set<Node> remote;
 
 		public Result() {
 			this.local = new HashSet<Node>();
@@ -109,13 +120,18 @@ public class Offload {
 		}
 	}//class end Result	
 
-	InternalNode startNode;	//algorithm needs an arbitrary startNode, we always take the first which is unoffloadable
-	int[][] m;				//edge matrix with communication costs; symmetric (only undirected edges)
-	InternalNode[] nodes;	//set of all nodes
-	// We keep track of the number of active nodes as we remove merged nodes from the edge matrix
-	// but keep the corresponding rows and columns. This extra book-keeping lets minCutPhase() know
-	// how many nodes there are left which it needs in order to know when it has consumed all the
-	// nodes.
+	/** algorithm needs an arbitrary startNode, we always take the first which is unoffloadable */
+	InternalNode startNode;
+	/** edge matrix with communication costs; symmetric (only undirected edges) */
+	int[][] m;
+	/** set of all nodes */
+	InternalNode[] nodes;
+	/**
+	 * We keep track of the number of active nodes as we remove merged nodes from the edge matrix
+	 * but keep the corresponding rows and columns. This extra book-keeping lets minCutPhase() know
+	 * how many nodes there are left which it needs in order to know when it has consumed all the
+	 * nodes.
+	 */
 	int activeNodes;		//counter of active nodes, TODO: geht bestimmt besser
 
 	public Offload(Node... nodes) {
