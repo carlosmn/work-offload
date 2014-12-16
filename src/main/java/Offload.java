@@ -6,9 +6,6 @@ import java.util.*;
  */
 
 public class Offload {
-	////////////////////////////////////
-	////nested classes//////////////////
-	////////////////////////////////////
 	static public class Node {
 		public final int localCost;
 		public final int remoteCost;
@@ -111,10 +108,7 @@ public class Offload {
 			this.remote = new HashSet<Node>();
 		}
 	}//class end Result	
-	////////////////////////////////////
-	////end nested classes//////////////
-	////////////////////////////////////
-	
+
 	InternalNode startNode;	//algorithm needs an arbitrary startNode, we always take the first which is unoffloadable
 	int[][] m;				//edge matrix with communication costs; symmetric (only undirected edges)
 	InternalNode[] nodes;	//set of all nodes
