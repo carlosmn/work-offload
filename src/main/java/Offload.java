@@ -130,13 +130,16 @@ public class Offload {
 		this.activeNodes = nodes.length;		
 		Map<Node, Integer> mapping = new HashMap<Node, Integer>();// mapping between an object and our offset for it
 		
-		//filling nodes
+		// Create the internal representation of the nodes, which we can modify as needed
+		// while keeping a reference to the unmodified input node.
 		for (int i = 0; i < nodes.length; i++) {
 			Node n = nodes[i];
 			mapping.put(n, i);
 			this.nodes[i] = new InternalNode(i, n);
 		}
-		//filling m
+
+		// Go through each outgoing edge and store it as a bidirectional edge in our
+		// edge matrix for simpler access.
 		for (Node n : nodes) {
 			int i = mapping.get(n);
 			for (Edge e : n.edges) {
@@ -163,7 +166,8 @@ public class Offload {
 			throw new Exception("no unoffloadable nodes");//TODO algo sollte auch ohne unoffloadable funktionieren
 
 		startNode = unoff.get(0);
-		//merge all unoffloadable nodes into one
+		// All unoffloadable nodes are merged into a single one, as those can never be
+		// remote. We can save some processing by pretending they're a single one.
 		for (int j = 1; j < unoff.size(); j++) {
 			mergeVertices(m, startNode, unoff.get(j));
 			this.activeNodes--;
@@ -171,7 +175,8 @@ public class Offload {
 
 		Cut minCut = null, lastCut = null;
 
-		//determine optimal cut
+		// Find the minimal cut by storing the one with the lowest cost. We stop iterating when
+		// the new cut's set has a single entry, which means that we've processed the whole graph
 		do {
 			lastCut = minCutPhase();
 			if (minCut == null || lastCut.weight < minCut.weight) {
@@ -181,14 +186,18 @@ public class Offload {
 			this.activeNodes--;
 		} while (lastCut.A.size() > 1);
 		
-		//fill local set in result object
+		// Seed the local node set from the unoffloadable list (which are
+		// by definition local)
 		for (InternalNode n : unoff) {
 			result.local.add(n.parent);
 		}
+		// and then add those from the cut we decided was the optimal one.
 		for (InternalNode n : minCut.A) {
 			result.local.add(n.parent);
 		}
-		//fill remote set in result object
+
+		// Every node which is not in the local set is automatically
+		// in the remote set.
 		for (InternalNode n : this.nodes) {
 			if (!result.local.contains(n.parent))
 				result.remote.add(n.parent);
@@ -223,7 +232,8 @@ public class Offload {
 		graph[s.id][t.id] = -1;
 		graph[t.id][s.id] = -1;
 
-		//add communication costs of t to s
+		// Add t's edges to s and remove them from t. For edges with a common target
+		// we add up the costs.
 		int tRow[] = graph[t.id];
 		for (int i = 0; i < graph.length; i++) {
 			int tCost = tRow[i];
