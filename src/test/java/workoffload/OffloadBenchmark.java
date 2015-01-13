@@ -32,7 +32,7 @@ public class OffloadBenchmark extends AbstractBenchmark {
 		e.addEdge(f, 1);
 
 		Offload offload = new Offload(a, b, c, d, e, f);
-		Offload.Result result = offload.optimize();
+		Offload.Result result = offload.optimize(CostModel.responseTime());
 		Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
 		Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
 	}
@@ -78,6 +78,6 @@ public class OffloadBenchmark extends AbstractBenchmark {
 		n.addEdge(o, 2);
 
 		Offload offload = new Offload(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o);
-		Offload.Result result = offload.optimize();
+		Offload.Result result = offload.optimize(CostModel.responseTime());
 	}
 }

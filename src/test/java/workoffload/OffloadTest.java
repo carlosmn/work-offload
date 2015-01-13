@@ -37,7 +37,7 @@ public class OffloadTest {
     public void testLinear()
         throws Exception {
         Offload offload = new Offload(a, b, c, d, e, f);
-        Offload.Result result = offload.optimize();
+        Offload.Result result = offload.optimize(CostModel.responseTime());
 
         Assert.assertEquals(new HashSet(Arrays.asList(a, b, c, d)), result.local);
         Assert.assertEquals(new HashSet(Arrays.asList(e, f)), result.remote);
@@ -75,7 +75,7 @@ public class OffloadTest {
         e.addEdge(f, 1);
 
         Offload offload = new Offload(a, b, c, d, e, f);
-        Offload.Result result = offload.optimize();
+        Offload.Result result = offload.optimize(CostModel.responseTime());
         Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
         Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
     }
