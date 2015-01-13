@@ -1,3 +1,5 @@
+package workoffload;
+
 import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import org.junit.Assert;
@@ -36,7 +38,7 @@ public class OffloadBenchmark extends AbstractBenchmark {
 	}
 
 	@Test
-	@BenchmarkOptions(benchmarkRounds = 5, warmupRounds = 1)
+	@BenchmarkOptions(benchmarkRounds = 50, warmupRounds = 1)
 	public void testLargishGraph()
 		throws Exception {
 		a = new Offload.Node(5, 5, false);
