@@ -3,29 +3,47 @@ package workoffload;
 import java.util.*;
 
 /**
- * Implementation of the Optimal Offloading Partitioning Algorithm (Authors: Huaming Wu, Katinka Wolter) 
+ * Implementation of the Optimal Offloading Partitioning Algorithm (Authors: Huaming Wu, Katinka Wolter)
  * 	by Carlos Martín Nieto, Daniel Seidenstücker (both Freie Universität Berlin)
  */
 
 public class Offload {
 	static public class Node {
-		public final int localCost;
-		public final int remoteCost;
+		public final float localCost;
+		public final float remoteCost;
 		public final boolean offloadable;
 
 		/** contains target edges with corresponding costs */
 		List<Edge> edges = new ArrayList<Edge>();
 
+		/**
+		 * Create a new node
+		 *
+		 * @param local local cost of processing (in time)
+		 * @param remote remote cost of processing (in time)
+		 */
 		public Node(int local, int remote) {
 			this(local, remote, true);
 		}
 
+		/**
+		 * Create a new node
+		 *
+		 * @param local local cost of processing (in time)
+		 * @param remote remote cost of processing (in time)
+		 * @param offloadable whether this node can be offloaded
+		 */
 		public Node(int local, int remote, boolean offloadable) {
 			this.localCost = local;
 			this.remoteCost = remote;
 			this.offloadable = offloadable;
 		}
 
+		/**
+		 * Add an edge between this node and 'n'
+		 * @param n the node to connect to
+		 * @param transmissionCost the cost of transmitting data (in time)
+		 */
 		public void addEdge(Node n, int transmissionCost) {
 			this.edges.add(new Edge(n, transmissionCost));
 		}
@@ -34,21 +52,21 @@ public class Offload {
 	static public class Edge {
 		/** target node */
 		public final Node node;
-		public final int cost;//TODO: eindeutig benennen
+		public final float cost;//TODO: eindeutig benennen
 
-		public Edge(Node node, int cost) {
+		public Edge(Node node, float cost) {
 			this.node = node;
 			this.cost = cost;
 		}
 	}//class end Edge
-	
+
 	// this would be a good candidate for optimisation if the processing time
 	// gets too expensive
 	static class InternalNode {
 		/** internal identification number for nodes, beginning at 0 */
 		int id;
-		int localCost;
-		int remoteCost;
+		float localCost;
+		float remoteCost;
 		boolean offloadable;
 		Node parent;		//corresponding node object
 
@@ -81,11 +99,11 @@ public class Offload {
 		/** all nodes as InternalNodes */
 		public final InternalNode[] nodes;
 		/** edge matric with communication costs (similar to m) */
-		public final int[][] graph;
+		public final float[][] graph;
 		/** calculated weight of this cut () */
 		public final float weight;
 
-		public Cut(Set<InternalNode> A, int[][] graph, int[][] origGraph,InternalNode[] nodes, int s, int t) {
+		public Cut(Set<InternalNode> A, float[][] graph, float[][] origGraph,InternalNode[] nodes, int s, int t) {
 			this.A = A;
 			this.graph = graph;
 			this.nodes = nodes;
@@ -95,14 +113,14 @@ public class Offload {
 		}
 		
 		/** sum=all localcosts-(t.localCost-t.remoteCost)+communication costs of edges t->graph\{t} */
-		float calculateWeight(int[][] m) {
+		float calculateWeight(float[][] m) {
 			float sum = 0;
 			for (int i = 0; i < this.nodes.length; i++) {
 				sum += this.nodes[i].parent.localCost;
 			}
 			sum -= this.nodes[t].localCost - this.nodes[t].remoteCost;
 			for (int i = 0; i < m.length; i++) {
-				int cost = m[t][i];
+				float cost = m[t][i];
 				if (cost >= 0)//-1 means no connection
 					sum += cost;
 			}
@@ -125,9 +143,11 @@ public class Offload {
 	/** algorithm needs an arbitrary startNode, we always take the first which is unoffloadable */
 	InternalNode startNode;
 	/** edge matrix with communication costs; symmetric (only undirected edges) */
-	int[][] m;
+	float[][] m;
 	/** set of all nodes */
 	InternalNode[] nodes;
+	// User nodes
+	final Node userNodes[];
 	/**
 	 * We keep track of the number of active nodes as we remove merged nodes from the edge matrix
 	 * but keep the corresponding rows and columns. This extra book-keeping lets minCutPhase() know
@@ -137,31 +157,40 @@ public class Offload {
 	int activeNodes;		//counter of active nodes, TODO: geht bestimmt besser
 
 	public Offload(Node... nodes) {
-		this.m = new int[nodes.length][nodes.length];
-		//filling m initally with -1 (no connection)
-		for (int[] arr : this.m) {
-			Arrays.fill(arr, -1);
+		this.userNodes = nodes;
+	}
+
+	void internalizeNodes(ICostModel model) {
+		model.setNodes(this.userNodes);
+		this.m = new float[userNodes.length][userNodes.length];
+		//filling m initially with -1 (no connection)
+		for (float[] arr : this.m) {
+			Arrays.fill(arr, -1f);
 		}
-		this.nodes = new InternalNode[nodes.length];
-		this.activeNodes = nodes.length;		
+		this.nodes = new InternalNode[userNodes.length];
+		this.activeNodes = userNodes.length;
 		Map<Node, Integer> mapping = new HashMap<Node, Integer>();// mapping between an object and our offset for it
-		
+
 		// Create the internal representation of the nodes, which we can modify as needed
 		// while keeping a reference to the unmodified input node.
-		for (int i = 0; i < nodes.length; i++) {
-			Node n = nodes[i];
+		for (int i = 0; i < userNodes.length; i++) {
+			Node n = userNodes[i];
 			mapping.put(n, i);
 			this.nodes[i] = new InternalNode(i, n);
+			//this.nodes[i].localCost = model.localCost(this.nodes[i].localCost);
+			//this.nodes[i].remoteCost = model.remoteCost(this.nodes[i].remoteCost);
 		}
 
 		// Go through each outgoing edge and store it as a bidirectional edge in our
 		// edge matrix for simpler access.
-		for (Node n : nodes) {
+		for (Node n : userNodes) {
 			int i = mapping.get(n);
 			for (Edge e : n.edges) {
 				int j = mapping.get(e.node);
 				this.m[i][j] = e.cost;
 				this.m[j][i] = e.cost;
+				//this.m[i][j] = model.transmissionCost(e.cost);
+				//this.m[j][i] = model.transmissionCost(e.cost);
 			}
 		}
 	}
@@ -174,7 +203,9 @@ public class Offload {
 	 * @return a Result object with sets of nodes which should be computed locally and remotely. These sets contain
 	 * the unmodified Nodes given as input.
 	 */	
-	public Result optimize() throws Exception {
+	public Result optimize(ICostModel model) throws Exception {
+		internalizeNodes(model);
+
 		Result result = new Result();
 
 		List<InternalNode> unoff = findUnoffloadable();
@@ -239,26 +270,26 @@ public class Offload {
 	 * @param s the node to merge into.
 	 * @param t the node to merge into s.
 	 */
-	static void mergeVertices(int[][] graph, InternalNode s, InternalNode t) {
+	static void mergeVertices(float[][] graph, InternalNode s, InternalNode t) {
 		//add up the computation costs
 		s.localCost += t.localCost;
 		s.remoteCost += t.remoteCost;
 
 		//disconnect the vertices to be merged
-		graph[s.id][t.id] = -1;
-		graph[t.id][s.id] = -1;
+		graph[s.id][t.id] = -1f;
+		graph[t.id][s.id] = -1f;
 
 		// Add t's edges to s and remove them from t. For edges with a common target
 		// we add up the costs.
-		int tRow[] = graph[t.id];
+		float tRow[] = graph[t.id];
 		for (int i = 0; i < graph.length; i++) {
-			int tCost = tRow[i];
-			if (tCost == -1)
+			float tCost = tRow[i];
+			if (tCost == -1f)
 				continue;
 			
-			int sCost = graph[s.id][i];
-			int newCost;
-			if (sCost == -1)
+			float sCost = graph[s.id][i];
+			float newCost;
+			if (sCost == -1f)
 				newCost = tCost;
 			else
 				newCost = sCost + tCost;
@@ -267,15 +298,15 @@ public class Offload {
 			graph[s.id][i] = newCost;
 			graph[i][s.id] = newCost;
 			//remove the old edge
-			graph[t.id][i] = -1;
-			graph[i][t.id] = -1;
+			graph[t.id][i] = -1f;
+			graph[i][t.id] = -1f;
 		}
 	}
 
 	Cut minCutPhase() {
 		//we need to make a copy of the graph, as we are going to merge nodes and
 		//we do not want those changes to appear on the main nodes
-		int[][] graph = new int[m.length][0];
+		float[][] graph = new float[m.length][0];
 		for (int i = 0; i < m.length; i++) {
 			graph[i] = Arrays.copyOf(m[i], m[i].length);
 		}
@@ -295,14 +326,15 @@ public class Offload {
 		
 		// while A =/= V_i
 		while (A.size() < this.activeNodes) {
-			int vMaxIdx = 0, vMaxGain = Integer.MIN_VALUE;
+			int vMaxIdx = 0;
+			float vMaxGain = Float.MIN_VALUE;
 			// while v \in V_i and v \not\in A
 			for (int i = 0; i < scratchNodes.length; i++) {
-				if (A.contains(scratchNodes[i]) || graph[aIdx][i] == -1) {
+				if (A.contains(scratchNodes[i]) || graph[aIdx][i] == -1f) {
 					continue;
 				}
 				InternalNode node = scratchNodes[i];
-				int gain = graph[aIdx][i] - (node.localCost - node.remoteCost);
+				float gain = graph[aIdx][i] - (node.localCost - node.remoteCost);
 				if (gain > vMaxGain) {
 					vMaxGain = gain;
 					vMaxIdx = i;
