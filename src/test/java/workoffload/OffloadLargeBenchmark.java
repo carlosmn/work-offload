@@ -62,6 +62,6 @@ public class OffloadLargeBenchmark extends AbstractBenchmark {
     public void TestLargeGraph()
     throws Exception {
         Offload offload = new Offload(nodes.toArray(new Offload.Node[nodes.size()]));
-        Offload.Result result = offload.optimize();
+        Offload.Result result = offload.optimize(CostModel.responseTime());
     }
 }
