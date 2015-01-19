@@ -160,7 +160,7 @@ public class Offload {
 		this.userNodes = nodes;
 	}
 
-	void internalizeNodes(ICostModel model) {
+	void internalizeNodes(CostModel model) {
 		model.setNodes(this.userNodes);
 		this.m = new float[userNodes.length][userNodes.length];
 		//filling m initially with -1 (no connection)
@@ -203,7 +203,7 @@ public class Offload {
 	 * @return a Result object with sets of nodes which should be computed locally and remotely. These sets contain
 	 * the unmodified Nodes given as input.
 	 */	
-	public Result optimize(ICostModel model) throws Exception {
+	public Result optimize(CostModel model) throws Exception {
 		internalizeNodes(model);
 
 		Result result = new Result();

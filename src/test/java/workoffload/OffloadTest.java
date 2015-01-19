@@ -3,13 +3,9 @@ package workoffload;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.Assert;
-import org.junit.rules.ExpectedException;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  *
@@ -37,7 +33,7 @@ public class OffloadTest {
     public void testLinear()
         throws Exception {
         Offload offload = new Offload(a, b, c, d, e, f);
-        Offload.Result result = offload.optimize(CostModel.responseTime());
+        Offload.Result result = offload.optimize(CostModels.responseTime());
 
         Assert.assertEquals(new HashSet(Arrays.asList(a, b, c, d)), result.local);
         Assert.assertEquals(new HashSet(Arrays.asList(e, f)), result.remote);
@@ -75,7 +71,7 @@ public class OffloadTest {
         e.addEdge(f, 1);
 
         Offload offload = new Offload(a, b, c, d, e, f);
-        Offload.Result result = offload.optimize(CostModel.responseTime());
+        Offload.Result result = offload.optimize(CostModels.responseTime());
         Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
         Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
     }
