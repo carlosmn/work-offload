@@ -74,5 +74,8 @@ public class OffloadTest {
         Offload.Result result = offload.optimize(CostModels.responseTime());
         Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
         Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
+        Assert.assertEquals(27, result.originalCost, 0);
+        Assert.assertEquals(14, result.cost, 0);
+        Assert.assertEquals(0.518, result.savings, 0.001);
     }
 }

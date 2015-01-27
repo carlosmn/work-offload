@@ -134,6 +134,20 @@ public class Offload {
 		/** set of nodes which should be calculated remotely */
 		Set<Node> remote;
 
+		/**
+		 * Cost of performing all computation locally
+		 */
+		float originalCost;
+		/**
+		 * Cost when using the local/remote partitioning in this object.
+		 */
+		float cost;
+
+		/**
+		 * Saved costs relative to performing computation locally, between 0 and 1.
+		 */
+		float savings;
+
 		public Result() {
 			this.local = new HashSet<Node>();
 			this.remote = new HashSet<Node>();
@@ -158,6 +172,16 @@ public class Offload {
 
 	public Offload(Node... nodes) {
 		this.userNodes = nodes;
+	}
+
+	float sumLocalCost() {
+		float sum = 0;
+
+		for (InternalNode n : this.nodes) {
+			sum += n.localCost;
+		}
+
+		return sum;
 	}
 
 	void internalizeNodes(CostModel model) {
@@ -218,6 +242,8 @@ public class Offload {
 			this.activeNodes--;
 		}
 
+		result.originalCost = sumLocalCost();
+
 		Cut minCut = null, lastCut = null;
 
 		// Find the minimal cut by storing the one with the lowest cost. We stop iterating when
@@ -240,6 +266,9 @@ public class Offload {
 		for (InternalNode n : minCut.A) {
 			result.local.add(n.parent);
 		}
+
+		result.cost = minCut.weight;
+		result.savings = result.cost / result.originalCost;
 
 		// Every node which is not in the local set is automatically
 		// in the remote set.
