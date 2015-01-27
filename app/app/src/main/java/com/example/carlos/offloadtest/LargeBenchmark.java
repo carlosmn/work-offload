@@ -40,10 +40,10 @@ public class LargeBenchmark {
 
     @Before
     public void setUp() {
-        nodes = new ArrayList<Offload.Node>(150);
+        nodes = new ArrayList<Offload.Node>(50);
 
         Offload.Node[] lastCreated, currentSet = null;
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 10; i++) {
             lastCreated = currentSet;
             currentSet = createNodePattern(i == 0);
 

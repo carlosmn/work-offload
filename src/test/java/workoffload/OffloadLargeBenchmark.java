@@ -58,10 +58,13 @@ public class OffloadLargeBenchmark extends AbstractBenchmark {
     }
 
     @Test
-    @BenchmarkOptions(benchmarkRounds = 50, warmupRounds = 5)
+    @BenchmarkOptions(benchmarkRounds = 50, warmupRounds = 5, callgc = true)
     public void TestLargeGraph()
     throws Exception {
+        Runtime rt = Runtime.getRuntime();
+        System.out.println("before " + (rt.totalMemory() - rt.freeMemory()));
         Offload offload = new Offload(nodes.toArray(new Offload.Node[nodes.size()]));
         Offload.Result result = offload.optimize(CostModels.responseTime());
+        System.out.println("after " + (rt.totalMemory() - rt.freeMemory()));
     }
 }

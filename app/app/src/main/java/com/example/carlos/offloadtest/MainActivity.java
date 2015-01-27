@@ -17,6 +17,13 @@ import org.junit.runner.Result;
 public class MainActivity extends ActionBarActivity {
 
     private class RunBenchmarkTask extends AsyncTask<Class, Void, Result> {
+        long memoryAtStart;
+
+        RunBenchmarkTask(long memoryAtStart) {
+            super();
+            this.memoryAtStart = memoryAtStart;
+        }
+
         /** The system calls this to perform work in a worker thread and
          * delivers it the parameters given to AsyncTask.execute() */
         protected Result doInBackground(Class... classes) {
@@ -30,6 +37,13 @@ public class MainActivity extends ActionBarActivity {
             TextView text = (TextView) findViewById(R.id.textView);
             text.setText(String.format("Ran %dms, %d tests %d fail",
                     res.getRunTime(), res.getRunCount(), res.getFailureCount()));
+            Runtime rt = Runtime.getRuntime();
+            long memoryNow = rt.totalMemory() - rt.freeMemory();
+            text = (TextView) findViewById(R.id.memoryAfterText);
+            text.setText(String.format("At the end %f", memoryNow / (1024.0 * 1024)));
+            text = (TextView) findViewById(R.id.memorySavedText);
+            text.setText(String.format("Using %f", (memoryNow - this.memoryAtStart) / (1024.0 * 1024)));
+
         }
     }
     @Override
@@ -42,7 +56,12 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onClick(View v) {
-                new RunBenchmarkTask().execute(LargeBenchmark.class);
+                Runtime rt = Runtime.getRuntime();
+                rt.gc();
+                TextView text = (TextView) findViewById(R.id.memoryAtStartText);
+                long memoryNow = rt.totalMemory() - rt.freeMemory();
+                text.setText(String.format("At start %f", memoryNow / (1024.0 * 1024)));
+                new RunBenchmarkTask(memoryNow).execute(LargeBenchmark.class);
             }
         });
 
