@@ -22,14 +22,14 @@ public class OffloadBenchmark extends AbstractBenchmark {
 		e = new Offload.Node(6, 2);
 		f = new Offload.Node(9, 3);
 
-		a.addEdge(b, 10);
-		b.addEdge(c, 1);
-		b.addEdge(d, 2);
-		c.addEdge(d, 1);
-		c.addEdge(e, 1);
-		d.addEdge(e, 2);
-		d.addEdge(f, 1);
-		e.addEdge(f, 1);
+		a.setEdge(b, 10);
+		b.setEdge(c, 1);
+		b.setEdge(d, 2);
+		c.setEdge(d, 1);
+		c.setEdge(e, 1);
+		d.setEdge(e, 2);
+		d.setEdge(f, 1);
+		e.setEdge(f, 1);
 
 		Offload offload = new Offload(a, b, c, d, e, f);
 		Offload.Result result = offload.optimize(CostModels.responseTime());
@@ -57,25 +57,25 @@ public class OffloadBenchmark extends AbstractBenchmark {
 		n = new Offload.Node(5, 5);
 		o = new Offload.Node(5, 5);
 
-		a.addEdge(b, 2);
-		a.addEdge(e, 2);
-		a.addEdge(f, 2);
-		b.addEdge(c, 2);
-		c.addEdge(d, 2);
-		d.addEdge(j, 2);
-		e.addEdge(g, 2);
-		f.addEdge(g, 2);
-		f.addEdge(h, 2);
-		g.addEdge(i, 2);
-		h.addEdge(i, 2);
-		h.addEdge(j, 2);
-		i.addEdge(l, 2);
-		j.addEdge(k, 2);
-		k.addEdge(m, 2);
-		k.addEdge(n, 2);
-		l.addEdge(m, 2);
-		m.addEdge(o, 2);
-		n.addEdge(o, 2);
+		a.setEdge(b, 2);
+		a.setEdge(e, 2);
+		a.setEdge(f, 2);
+		b.setEdge(c, 2);
+		c.setEdge(d, 2);
+		d.setEdge(j, 2);
+		e.setEdge(g, 2);
+		f.setEdge(g, 2);
+		f.setEdge(h, 2);
+		g.setEdge(i, 2);
+		h.setEdge(i, 2);
+		h.setEdge(j, 2);
+		i.setEdge(l, 2);
+		j.setEdge(k, 2);
+		k.setEdge(m, 2);
+		k.setEdge(n, 2);
+		l.setEdge(m, 2);
+		m.setEdge(o, 2);
+		n.setEdge(o, 2);
 
 		Offload offload = new Offload(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o);
 		Offload.Result result = offload.optimize(CostModels.responseTime());

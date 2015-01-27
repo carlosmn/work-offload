@@ -40,11 +40,22 @@ public class Offload {
 		}
 
 		/**
-		 * Add an edge between this node and 'n'
+		 * Set the costs for an edge between this node and 'n'.
+		 *
+		 * If the edge does not exist, it will be created. If it does exist, the
+		 * cost will be updated.
+		 *
 		 * @param n the node to connect to
 		 * @param transmissionCost the cost of transmitting data (in time)
 		 */
-		public void addEdge(Node n, int transmissionCost) {
+		public void setEdge(Node n, int transmissionCost) {
+			for (Edge e : this.edges) {
+				if (e.node == n) {
+					e.cost = transmissionCost;
+					return;
+				}
+			}
+
 			this.edges.add(new Edge(n, transmissionCost));
 		}
 	}//class end Node
@@ -52,7 +63,7 @@ public class Offload {
 	static public class Edge {
 		/** target node */
 		public final Node node;
-		public final float cost;//TODO: eindeutig benennen
+		public float cost;//TODO: eindeutig benennen
 
 		public Edge(Node node, float cost) {
 			this.node = node;

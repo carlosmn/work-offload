@@ -22,11 +22,11 @@ public class OffloadTest {
         e = new Offload.Node(4, 1);
         f = new Offload.Node(8, 2);
 
-        a.addEdge(b, 10);
-        b.addEdge(c, 6);
-        c.addEdge(d, 5);
-        d.addEdge(e, 5);
-        e.addEdge(f, 4);
+        a.setEdge(b, 10);
+        b.setEdge(c, 6);
+        c.setEdge(d, 5);
+        d.setEdge(e, 5);
+        e.setEdge(f, 4);
     }
 
     @Test
@@ -61,14 +61,14 @@ public class OffloadTest {
         e = new Offload.Node(6, 2);
         f = new Offload.Node(9, 3);
 
-        a.addEdge(b, 10);
-        b.addEdge(c, 1);
-        b.addEdge(d, 2);
-        c.addEdge(d, 1);
-        c.addEdge(e, 1);
-        d.addEdge(e, 2);
-        d.addEdge(f, 1);
-        e.addEdge(f, 1);
+        a.setEdge(b, 10);
+        b.setEdge(c, 1);
+        b.setEdge(d, 2);
+        c.setEdge(d, 1);
+        c.setEdge(e, 1);
+        d.setEdge(e, 2);
+        d.setEdge(f, 1);
+        e.setEdge(f, 1);
 
         Offload offload = new Offload(a, b, c, d, e, f);
         Offload.Result result = offload.optimize(CostModels.responseTime());
@@ -77,5 +77,42 @@ public class OffloadTest {
         Assert.assertEquals(27, result.originalCost, 0);
         Assert.assertEquals(14, result.cost, 0);
         Assert.assertEquals(0.518, result.savings, 0.001);
+    }
+
+    @Test
+    public void TestEdgeUpdate()
+        throws Exception {
+
+        a = new Offload.Node(0, 0, false);
+        b = new Offload.Node(3, 1);
+        c = new Offload.Node(3, 1);
+        d = new Offload.Node(6, 2);
+        e = new Offload.Node(6, 2);
+        f = new Offload.Node(9, 3);
+
+        a.setEdge(b, 10);
+        b.setEdge(c, 1);
+        b.setEdge(d, 2);
+        c.setEdge(d, 1);
+        c.setEdge(e, 1);
+        d.setEdge(e, 2);
+        d.setEdge(f, 1);
+        e.setEdge(f, 1);
+
+        Offload offload = new Offload(a, b, c, d, e, f);
+        Offload.Result result = offload.optimize(CostModels.responseTime());
+        Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
+        Assert.assertEquals(27, result.originalCost, 0);
+        Assert.assertEquals(14, result.cost, 0);
+        Assert.assertEquals(0.518, result.savings, 0.001);
+
+        a.setEdge(b, 1);
+        result = offload.optimize(CostModels.responseTime());
+        Assert.assertEquals(new HashSet(Arrays.asList(a)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(b, c, d, e, f)), result.remote);
+        Assert.assertEquals(27, result.originalCost, 0);
+        Assert.assertEquals(10, result.cost, 0);
+        Assert.assertEquals(0.370, result.savings, 0.001);
     }
 }

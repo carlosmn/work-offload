@@ -29,11 +29,11 @@ public class OffloadLargeBenchmark extends AbstractBenchmark {
         ns[3] = new Offload.Node(7, 4);
         ns[4] = new Offload.Node(7, 3);
 
-        ns[0].addEdge(ns[1], 2);
-        ns[0].addEdge(ns[2], 1);
-        ns[1].addEdge(ns[3], 5);
-        ns[2].addEdge(ns[3], 8);
-        ns[2].addEdge(ns[4], 7);
+        ns[0].setEdge(ns[1], 2);
+        ns[0].setEdge(ns[2], 1);
+        ns[1].setEdge(ns[3], 5);
+        ns[2].setEdge(ns[3], 8);
+        ns[2].setEdge(ns[4], 7);
 
         return ns;
     }
@@ -49,8 +49,8 @@ public class OffloadLargeBenchmark extends AbstractBenchmark {
 
             // if we do have a previous set (the usual case), connect the nodes at the edges
             if (lastCreated != null) {
-                lastCreated[3].addEdge(currentSet[1], 5);
-                lastCreated[4].addEdge(currentSet[0], 5);
+                lastCreated[3].setEdge(currentSet[1], 5);
+                lastCreated[4].setEdge(currentSet[0], 5);
             }
 
             nodes.addAll(Arrays.asList(currentSet));
