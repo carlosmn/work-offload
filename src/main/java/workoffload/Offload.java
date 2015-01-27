@@ -177,8 +177,8 @@ public class Offload {
 			Node n = userNodes[i];
 			mapping.put(n, i);
 			this.nodes[i] = new InternalNode(i, n);
-			//this.nodes[i].localCost = model.localCost(this.nodes[i].localCost);
-			//this.nodes[i].remoteCost = model.remoteCost(this.nodes[i].remoteCost);
+			this.nodes[i].localCost = model.localCost(this.nodes[i].localCost);
+			this.nodes[i].remoteCost = model.remoteCost(this.nodes[i].remoteCost);
 		}
 
 		// Go through each outgoing edge and store it as a bidirectional edge in our
@@ -187,10 +187,8 @@ public class Offload {
 			int i = mapping.get(n);
 			for (Edge e : n.edges) {
 				int j = mapping.get(e.node);
-				this.m[i][j] = e.cost;
-				this.m[j][i] = e.cost;
-				//this.m[i][j] = model.transmissionCost(e.cost);
-				//this.m[j][i] = model.transmissionCost(e.cost);
+				this.m[i][j] = model.transmissionCost(e.cost);
+				this.m[j][i] = model.transmissionCost(e.cost);
 			}
 		}
 	}
