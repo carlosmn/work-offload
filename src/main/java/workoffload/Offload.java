@@ -14,7 +14,7 @@ public class Offload {
 		public final boolean offloadable;
 
 		/** contains target edges with corresponding costs */
-		List<Edge> edges = new ArrayList<Edge>();
+		protected List<Edge> edges = new ArrayList<Edge>();
 
 		/**
 		 * Create a new node
