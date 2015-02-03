@@ -279,7 +279,7 @@ public class Offload {
 		}
 
 		result.cost = minCut.weight;
-		result.savings = result.cost / result.originalCost;
+		result.savings = 1 - (result.cost / result.originalCost);
 
 		// Every node which is not in the local set is automatically
 		// in the remote set.
