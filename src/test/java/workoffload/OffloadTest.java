@@ -84,6 +84,27 @@ public class OffloadTest {
         Assert.assertEquals(24.3, result.originalCost, 0.1);
         Assert.assertEquals(9, result.cost, 0);
         Assert.assertEquals(0.629, result.savings, 0.01);
+
+        result = offload.optimize(CostModels.weightedTimeAndEnergy(0.9f, 0.3f, 1.3f, 1f));
+        Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
+        Assert.assertEquals(1, result.originalCost, 0.1);
+        Assert.assertEquals(0.518, result.cost, 0.001);
+        Assert.assertEquals(0.481, result.savings, 0.001);
+
+        result = offload.optimize(CostModels.weightedTimeAndEnergy(0.9f, 0.3f, 1.3f, 0f));
+        Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
+        Assert.assertEquals(1, result.originalCost, 0.1);
+        Assert.assertEquals(0.370, result.cost, 0.001);
+        Assert.assertEquals(0.629, result.savings, 0.001);
+
+        result = offload.optimize(CostModels.weightedTimeAndEnergy(0.9f, 0.3f, 1.3f, 0.5f));
+        Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
+        Assert.assertEquals(1, result.originalCost, 0.1);
+        Assert.assertEquals(0.444, result.cost, 0.001);
+        Assert.assertEquals(0.555, result.savings, 0.001);
     }
 
     @Test
