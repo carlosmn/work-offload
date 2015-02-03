@@ -114,22 +114,26 @@ public class Offload {
 		/** calculated weight of this cut () */
 		public final float weight;
 
-		public Cut(Set<InternalNode> A, float[][] graph, float[][] origGraph, InternalNode[] nodes, CostModel model, int s, int t) {
+		public Cut(Set<InternalNode> A, float[][] graph, float[][] origGraph, InternalNode[] nodes, int s, int t) {
 			this.A = A;
 			this.graph = graph;
 			this.nodes = nodes;
 			this.s = s;
 			this.t = t;
-			this.weight = calculateWeight(origGraph, model);
+			this.weight = calculateWeight(origGraph);
 		}
 		
 		/** sum=all localcosts-(t.localCost-t.remoteCost)+communication costs of edges t->graph\{t} */
-		float calculateWeight(float[][] m, CostModel model) {
+		float calculateWeight(float[][] m) {
 			float sum = 0;
-			for (int i = 0; i < this.nodes.length; i++) {
-				sum += model.localCost(this.nodes[i].parent.localCost);
-			}
+
+			// The zeroth node contains the sum of all local and remote costs for this cut, so we can simply
+			// read from it and then substract the difference between local and remote for 't', which is the
+			// one we want to merge in the main graph.
+			sum += this.nodes[0].localCost;
 			sum -= this.nodes[t].localCost - this.nodes[t].remoteCost;
+
+			// Then we add the cost for each connection which exists on the original graph
 			for (int i = 0; i < m.length; i++) {
 				float cost = m[t][i];
 				if (cost >= 0)//-1 means no connection
@@ -357,6 +361,9 @@ public class Offload {
 		//keep track of which nodes we've already merged
 		Set<InternalNode> A = new HashSet<InternalNode>();
 
+		// It's important that this stays at zero. This is the node in which we merge the node
+		// we determine to be the most tightly connected node in each iteration. This node then
+		// contains the sum of all the local and remote costs.
 		int aIdx = 0;
 		int s = 0, t = 0;
 
@@ -389,6 +396,6 @@ public class Offload {
 		A.remove(scratchNodes[t]);
 
 		// return cut(A-t, t), s, t
-		return new Cut(A, graph, this.m, scratchNodes, model, s, t);
+		return new Cut(A, graph, this.m, scratchNodes, s, t);
 	}
 }//class end Offload
