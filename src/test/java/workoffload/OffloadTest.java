@@ -76,7 +76,14 @@ public class OffloadTest {
         Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
         Assert.assertEquals(27, result.originalCost, 0);
         Assert.assertEquals(14, result.cost, 0);
-        Assert.assertEquals(0.518, result.savings, 0.001);
+        Assert.assertEquals(0.481, result.savings, 0.001);
+
+        result = offload.optimize(CostModels.energyConsumption(0.9f, 0.3f, 1.3f));
+        Assert.assertEquals(new HashSet(Arrays.asList(a, b)), result.local);
+        Assert.assertEquals(new HashSet(Arrays.asList(c, d, e, f)), result.remote);
+        Assert.assertEquals(24.3, result.originalCost, 0.1);
+        Assert.assertEquals(9, result.cost, 0);
+        Assert.assertEquals(0.629, result.savings, 0.01);
     }
 
     @Test

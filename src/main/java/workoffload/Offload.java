@@ -114,20 +114,20 @@ public class Offload {
 		/** calculated weight of this cut () */
 		public final float weight;
 
-		public Cut(Set<InternalNode> A, float[][] graph, float[][] origGraph,InternalNode[] nodes, int s, int t) {
+		public Cut(Set<InternalNode> A, float[][] graph, float[][] origGraph, InternalNode[] nodes, CostModel model, int s, int t) {
 			this.A = A;
 			this.graph = graph;
 			this.nodes = nodes;
 			this.s = s;
 			this.t = t;
-			this.weight = calculateWeight(origGraph);
+			this.weight = calculateWeight(origGraph, model);
 		}
 		
 		/** sum=all localcosts-(t.localCost-t.remoteCost)+communication costs of edges t->graph\{t} */
-		float calculateWeight(float[][] m) {
+		float calculateWeight(float[][] m, CostModel model) {
 			float sum = 0;
 			for (int i = 0; i < this.nodes.length; i++) {
-				sum += this.nodes[i].parent.localCost;
+				sum += model.localCost(this.nodes[i].parent.localCost);
 			}
 			sum -= this.nodes[t].localCost - this.nodes[t].remoteCost;
 			for (int i = 0; i < m.length; i++) {
@@ -260,7 +260,7 @@ public class Offload {
 		// Find the minimal cut by storing the one with the lowest cost. We stop iterating when
 		// the new cut's set has a single entry, which means that we've processed the whole graph
 		do {
-			lastCut = minCutPhase();
+			lastCut = minCutPhase(model);
 			if (minCut == null || lastCut.weight < minCut.weight) {
 				minCut = lastCut;
 			}
@@ -341,7 +341,7 @@ public class Offload {
 		}
 	}
 
-	Cut minCutPhase() {
+	Cut minCutPhase(CostModel model) {
 		//we need to make a copy of the graph, as we are going to merge nodes and
 		//we do not want those changes to appear on the main nodes
 		float[][] graph = new float[m.length][0];
@@ -389,6 +389,6 @@ public class Offload {
 		A.remove(scratchNodes[t]);
 
 		// return cut(A-t, t), s, t
-		return new Cut(A, graph, this.m, scratchNodes, s, t);
+		return new Cut(A, graph, this.m, scratchNodes, model, s, t);
 	}
 }//class end Offload
