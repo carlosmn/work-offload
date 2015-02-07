@@ -43,7 +43,7 @@ public class LargeBenchmark {
         nodes = new ArrayList<Offload.Node>(50);
 
         Offload.Node[] lastCreated, currentSet = null;
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < State.nodeCreationRounds; i++) {
             lastCreated = currentSet;
             currentSet = createNodePattern(i == 0);
 

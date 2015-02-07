@@ -4,5 +4,7 @@
     <string name="app_name">OffloadTest</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="x5">x5 nodes</string>
+    <string name="runbench">Run Benchmark</string>
 
 </resources>

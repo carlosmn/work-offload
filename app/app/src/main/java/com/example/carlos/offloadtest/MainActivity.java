@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import org.junit.internal.Classes;
@@ -34,33 +35,50 @@ public class MainActivity extends ActionBarActivity {
         /** The system calls this to perform work in the UI thread and delivers
          * the result from doInBackground() */
         protected void onPostExecute(Result res) {
-            TextView text = (TextView) findViewById(R.id.textView);
-            text.setText(String.format("Ran %dms, %d tests %d fail",
-                    res.getRunTime(), res.getRunCount(), res.getFailureCount()));
+            TextView text = (TextView) findViewById(R.id.textView3);
             Runtime rt = Runtime.getRuntime();
             long memoryNow = rt.totalMemory() - rt.freeMemory();
-            text = (TextView) findViewById(R.id.memoryAfterText);
-            text.setText(String.format("At the end %f", memoryNow / (1024.0 * 1024)));
-            text = (TextView) findViewById(R.id.memorySavedText);
-            text.setText(String.format("Using %f", (memoryNow - this.memoryAtStart) / (1024.0 * 1024)));
-
+            double memoryUsage = (memoryNow - this.memoryAtStart) / (1024.0 * 1024);
+            text.setText(String.format("Ran %dms, %d tests %d fail, used %fMB",
+                    res.getRunTime(), res.getRunCount(), res.getFailureCount(), memoryUsage));
+            Button button = (Button) findViewById(R.id.button);
+            button.setEnabled(true);
         }
     }
+
+    void setMiltipliedValue(int value) {
+        TextView view = (TextView) findViewById(R.id.textView2);
+        view.setText(String.format("x5 nodes = %d", value * 5));
+        State.nodeCreationRounds = value;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        NumberPicker picker = (NumberPicker) findViewById(R.id.numberSelection);
+        picker.setMaxValue(100);
+        picker.setMinValue(1);
+        picker.setValue(5);
+
+        this.setMiltipliedValue(5);
+
+        picker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                setMiltipliedValue(newVal);
+            }
+        });
+
         Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
+                v.setEnabled(false);
                 Runtime rt = Runtime.getRuntime();
                 rt.gc();
-                TextView text = (TextView) findViewById(R.id.memoryAtStartText);
                 long memoryNow = rt.totalMemory() - rt.freeMemory();
-                text.setText(String.format("At start %f", memoryNow / (1024.0 * 1024)));
                 new RunBenchmarkTask(memoryNow).execute(LargeBenchmark.class);
             }
         });
