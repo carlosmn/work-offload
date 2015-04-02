@@ -73,7 +73,7 @@ constructors for the models implemented by this package.
 ```java
 Offload Offload = new Offload(a, b, c, d, e, f);
 Offload.Result result = Offload.optimize(CostModels.responseTime());
-
+```
 Some cost models need more information:
 
 ```java
