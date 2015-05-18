@@ -7,9 +7,7 @@ import org.junit.Assert;
 import java.util.Arrays;
 import java.util.HashSet;
 
-/**
- *
- */
+
 public class OffloadTest {
     Offload.Node a, b, c, d, e, f;
 
