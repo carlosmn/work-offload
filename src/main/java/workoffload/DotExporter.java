@@ -7,9 +7,7 @@ import java.nio.file.Files;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
-/**
- * Created by carlos on 03/02/15.
- */
+
 public class DotExporter {
 	static Dictionary<Offload.Node, String> nodeLabels(Offload.Node[] nodes) {
 		Dictionary<Offload.Node, String> nodeLabels = new Hashtable<Offload.Node, String>();
@@ -103,12 +101,12 @@ public class DotExporter {
 		d.setEdge(e, 2);
 		d.setEdge(f, 1);
 		e.setEdge(f, 1);
-
-		//System.out.println(fromNodes(a, b, c, d, e, f));
-
+		
 		Offload offload = new Offload(a, b, c, d, e, f);
 		Offload.Result result = offload.optimize(CostModels.responseTime());
-
+		
+		
+		//System.out.println(fromNodes(a, b, c, d, e, f));
 		System.out.println(fromResult(result));
 	}
 }
