@@ -3,8 +3,8 @@ package workoffload;
 import java.util.*;
 
 /**
- * Implementation of the Optimal Offloading Partitioning Algorithm (Authors: Huaming Wu, Katinka Wolter)
- * 	by Carlos Martín Nieto, Daniel Seidenstücker (both Freie Universität Berlin)
+ * Implementation of the Optimal Offloading Partitioning Algorithm (MCOP algorithm by Huaming Wu, Katinka Wolter)
+ * 	by Carlos Martín Nieto, Daniel Seidenstücker (both Freie Universitaet Berlin)
  */
 
 public class Offload {
@@ -58,20 +58,20 @@ public class Offload {
 
 			this.edges.add(new Edge(n, transmissionCost));
 		}
-	}//class end Node
+	}
 	
 	static public class Edge {
 		/** target node */
 		public final Node node;
-		public float cost;//TODO: eindeutig benennen
+		public float cost;
 
 		public Edge(Node node, float cost) {
 			this.node = node;
 			this.cost = cost;
 		}
-	}//class end Edge
+	}
 
-	// this would be a good candidate for optimisation if the processing time
+	// this would be a good candidate for optimization if the processing time
 	// gets too expensive
 	static class InternalNode {
 		/** internal identification number for nodes, beginning at 0 */
@@ -97,7 +97,7 @@ public class Offload {
 			this.parent = n.parent;
 
 		}
-	}//class end InternalNode
+	}
 	
 	/** a cut is a partitioning of a graph into 2 set of nodes: local calculated (A) and remote calculated (nodes-A) */
 	static class Cut {
@@ -141,7 +141,7 @@ public class Offload {
 			}
 			return sum;
 		}
-	}//class end Cut	
+	}	
 	
 	static public class Result {
 		/** Set of nodes which should be calculated locally */
@@ -149,25 +149,20 @@ public class Offload {
 		/** set of nodes which should be calculated remotely */
 		Set<Node> remote;
 
-		/**
-		 * Cost of performing all computation locally
-		 */
+		/** cost of performing all computation locally */
 		float originalCost;
-		/**
-		 * Cost when using the local/remote partitioning in this object.
-		 */
+		/** cost when using the local/remote partitioning of this object */
 		float cost;
 
-		/**
-		 * Saved costs relative to performing computation locally, between 0 and 1.
-		 */
+		/** saved costs relative to performing computation locally, between 0 and 1.
+		 * savings = 1 - (result.cost / result.originalCost) */
 		float savings;
 
 		public Result() {
 			this.local = new HashSet<Node>();
 			this.remote = new HashSet<Node>();
 		}
-	}//class end Result	
+	}	
 
 	/** algorithm needs an arbitrary startNode, we always take the first which is unoffloadable */
 	InternalNode startNode;
@@ -183,7 +178,7 @@ public class Offload {
 	 * how many nodes there are left which it needs in order to know when it has consumed all the
 	 * nodes.
 	 */
-	int activeNodes;		//counter of active nodes, TODO: geht bestimmt besser
+	int activeNodes;
 
 	public Offload(Node... nodes) {
 		this.userNodes = nodes;
@@ -233,9 +228,9 @@ public class Offload {
 	}
 
 	/**
-	 * Optimise the graph according to the given rules (TODO: allow specifying the rules).
+	 * Optimize the graph according to the given rules.
 	 *
-	 * This function is called MinCut in the paper.
+	 * This function is called MinCut in the MCOP paper.
 	 * 
 	 * @return a Result object with sets of nodes which should be computed locally and remotely. These sets contain
 	 * the unmodified Nodes given as input.
@@ -247,7 +242,7 @@ public class Offload {
 
 		List<InternalNode> unoff = findUnoffloadable();
 		if (unoff.isEmpty())
-			throw new Exception("no unoffloadable nodes");//TODO algo sollte auch ohne unoffloadable funktionieren
+			throw new Exception("no unoffloadable nodes");
 
 		startNode = unoff.get(0);
 		// All unoffloadable nodes are merged into a single one, as those can never be
@@ -262,7 +257,7 @@ public class Offload {
 		Cut minCut = null, lastCut = null;
 
 		// Find the minimal cut by storing the one with the lowest cost. We stop iterating when
-		// the new cut's set has a single entry, which means that we've processed the whole graph
+		// the new cut's set has a single entry, which means that we've processed the whole graph.
 		do {
 			lastCut = minCutPhase(model);
 			if (minCut == null || lastCut.weight < minCut.weight) {
@@ -369,11 +364,11 @@ public class Offload {
 
 		A.add(scratchNodes[aIdx]);
 		
-		// while A =/= V_i
+		// while A =/= V_i (paper)
 		while (A.size() < this.activeNodes) {
 			int vMaxIdx = 0;
 			float vMaxGain = Float.NEGATIVE_INFINITY;
-			// while v \in V_i and v \not\in A
+			// while v \in V_i and v \not\in A (paper)
 			for (int i = 0; i < scratchNodes.length; i++) {
 				if (A.contains(scratchNodes[i]) || graph[aIdx][i] == -1f) {
 					continue;
@@ -395,7 +390,7 @@ public class Offload {
 
 		A.remove(scratchNodes[t]);
 
-		// return cut(A-t, t), s, t
+		// return cut(A-t, t), s, t (paper)
 		return new Cut(A, graph, this.m, scratchNodes, s, t);
 	}
-}//class end Offload
+}
