@@ -2,22 +2,22 @@ Optimal Partitioning Algorithm
 ==============================
 
 This is an implementation in Java of an Optimal Partitioning
-Algorithm.
+Algorithm (MCOP algorithm by Wu et al.).
 
 The algorithm takes a weighted graph as input which represents your
 application's operations/calculations as the nodes and the
 communication between them as the edges. Each node has two costs: the
-first is the cost of performing the operation locally (e.g. on a
+first is the cost of performing the operation locally (e.g. on the mobile
 phone) and the second is the cost of performing it elsewhere (e.g. in
 the cloud). The weight of the edges is the communication cost to the
 offloaded computation. It is assumed that the communication cost
-between operations in each location are negligible.
+between operations in the same location are negligible.
 
 The result contains information about the costs and reports which
 operations should be performed locally and which should be offloaded.
 
 There are different cost models in order to choose what you want to
-optimise for (time, energy cost or a balance). You can also create
+optimize for (time, energy cost or a balance). You can also create
 your custom cost model if these do not satisfy your needs.
 
 In order to avoid adding more work to an operation which is already
@@ -105,7 +105,7 @@ float originalCost = result.originalCost;
 //cost when using the local/remote partitioning of this object
 float cost = result.cost;
 
-//saved costs relative to performing computation locally, between 0 and 1.
+//saved costs relative to performing all computation locally, between 0 and 1.
 //savings = 1 - (result.cost / result.originalCost)
 float savings = result.savings;
 ```
@@ -156,11 +156,11 @@ Output in dot Format
 --------------------
 
 We also provide a built-in way to create a string in dot-format which
-shows graph before and/or after the optimization. The optimized graph
+shows the graph before and/or after the optimization. The optimized graph
 will be colored – blue for locally computed and red for remotely
-computed. You can use tools which understand the 'dot' format to
+computed. You can use tools which understand the dot-format to
 generate a graph; for example GraphViz which has the `dot` command and
-it likely available for your platform.
+is likely available for your platform.
 
 ```java
 Offload offload = new Offload(a, b, c, d, e, f);
@@ -168,7 +168,7 @@ Offload.Result result = offload.optimize(CostModels.responseTime());
 String dotformat = DotExporter.fromResult(result);
 ```
 
-Or to graph the input
+Or to get the dot string before optimization
 
 ```java
 String dotformat = DotExporter.fromNodes(a, b, c, d, e, f)
